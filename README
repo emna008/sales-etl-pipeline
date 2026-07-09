@@ -1,6 +1,122 @@
-feature/<CLE-TICKET>-<résumé-court>     ex: feature/DATA-102-etl
+# Sales ETL Pipeline
+
+Pipeline ETL qui charge automatiquement les ventes quotidiennes (fichier CSV) dans PostgreSQL, avec calcul d'indicateurs métier (chiffre d'affaires du jour, panier moyen, top produits).
+
+Projet lié à l'Epic Jira **Pipeline ETL Ventes Quotidiennes** — documentation détaillée disponible sur la page Confluence associée (voir lien plus bas).
+
+## Format du fichier CSV attendu
+
+| Colonne | Type | Description |
+|---|---|---|
+| `date` | date | Date de la vente (YYYY-MM-DD) |
+| `produit_id` | string | Identifiant du produit |
+| `produit_nom` | string | Nom du produit |
+| `quantite` | int | Quantité vendue |
+| `prix_unitaire` | float | Prix unitaire (avant remise) |
+| `magasin_id` | string | Identifiant du magasin |
+
+## Architecture
+
+```
+CSV → Extraction → Nettoyage (Pandas) → Chargement (PostgreSQL) → Calcul indicateurs
+```
+
+## Structure du projet
+
+```
+sales-etl-pipeline/
+├── src/
+│   ├── etl.py              # Point d'entrée : orchestre le pipeline
+│   ├── cleaning.py         # Nettoyage et validation des données
+│   └── load_postgres.py    # Connexion et chargement PostgreSQL
+├── tests/
+│   ├── test_cleaning.py
+│   └── test_load_postgres.py
+├── data/
+│   └── samples/
+│       └── ventes_exemple.csv
+├── .github/
+│   └── workflows/
+│       └── ci.yml
+├── docker-compose.yml      # PostgreSQL local pour dev/tests
+├── requirements.txt
+├── .gitignore
+└── README.md
+```
+
+## Installation
+
+```bash
+git clone https://github.com/entreprise/sales-etl-pipeline.git
+cd sales-etl-pipeline
+
+python -m venv venv
+source venv/bin/activate        # Windows : venv\Scripts\activate
+
+pip install -r requirements.txt
+```
+
+## Base de données locale
+
+```bash
+docker compose up -d
+```
+
+Variables d'environnement utilisées (valeurs par défaut adaptées au `docker-compose.yml`) :
+
+| Variable | Valeur par défaut |
+|---|---|
+| `DB_HOST` | `localhost` |
+| `DB_NAME` | `sales_db` |
+| `DB_USER` | `postgres` |
+| `DB_PASSWORD` | `postgres` |
+
+## Utilisation
+
+```bash
+python src/etl.py --input data/samples/ventes_exemple.csv
+```
+
+Le script :
+1. Lit le CSV fourni.
+2. Nettoie et valide les données (`cleaning.py`).
+3. Crée les tables si nécessaire et charge les données (`load_postgres.py`).
+4. Calcule et stocke les indicateurs du jour dans `sales_daily_metrics`.
+
+Un code de sortie non nul (`sys.exit(1)`) indique un échec à l'une des étapes ; les détails sont loggés en console.
+
+## Tables PostgreSQL
+
+- **`sales_raw`** : données brutes nettoyées, contrainte d'unicité sur `date + produit_id + magasin_id` (rejeu idempotent, pas de doublons).
+- **`sales_daily_metrics`** : `date`, `ca_total`, `panier_moyen`, `top_produit_id`, `top_produit_nom`.
+
+## Tests
+
+```bash
+pytest tests/ --cov=src --cov-report=term-missing
+flake8 src/ tests/
+```
+
+## CI/CD
+
+Le workflow `.github/workflows/ci.yml` exécute automatiquement lint + tests + validation du pipeline à chaque push, ainsi qu'un run planifié quotidien à 6h UTC. Le déploiement se déclenche sur push vers `main`.
+
+## Convention de branches et commits
+
+```
+feature/<CLE-TICKET>-<résumé-court>     ex: feature/DATA-3-etl
 fix/<CLE-TICKET>-<résumé-court>
 hotfix/<CLE-TICKET>-<résumé-court>
 
-Commit : toujours préfixé par la clé du ticket, verbe à l'impératif
-ex: "DATA-102 Create ETL pipeline entry point"
+Commit : toujours préfixé par la clé du ticket Jira, verbe à l'impératif
+ex: "DATA-3 Create ETL pipeline entry point"
+```
+
+## Équipe
+
+| Rôle | Nom |
+|---|---|
+| Product Manager | Sarah |
+| Tech Lead / Data Engineer Senior | Yassine |
+| Data Engineer | Emna |
+| QA / Testeur | Karim |
