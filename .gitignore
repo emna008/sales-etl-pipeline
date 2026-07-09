@@ -1,4 +1,6 @@
 __pycache__/
 *.pyc
+temp_auto_push.bat
 venv/
-.env
+.env.gitignore
+branch_structure.json
