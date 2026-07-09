@@ -44,10 +44,10 @@ sales_daily_metrics = Table(
 
 
 def get_database_url() -> str:
-    host = os.environ["DB_HOST"]
-    name = os.environ["DB_NAME"]
-    user = os.environ["DB_USER"]
-    password = os.environ["DB_PASSWORD"]
+    host = os.getenv("DB_HOST", "localhost")
+    name = os.getenv("DB_NAME", "sales_db")
+    user = os.getenv("DB_USER", "postgres")
+    password = os.getenv("DB_PASSWORD", "postgres")
     return f"postgresql+psycopg2://{user}:{password}@{host}/{name}"
 
 

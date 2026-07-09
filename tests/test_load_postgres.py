@@ -1,3 +1,7 @@
+# Avant les tests:
+# docker compose up -d
+# python src/etl.py --input data/samples/ventes_exemple.csv
+
 import os
 from datetime import date
 
