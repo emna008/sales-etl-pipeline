@@ -1,0 +1,6 @@
+feature/<CLE-TICKET>-<résumé-court>     ex: feature/DATA-102-etl
+fix/<CLE-TICKET>-<résumé-court>
+hotfix/<CLE-TICKET>-<résumé-court>
+
+Commit : toujours préfixé par la clé du ticket, verbe à l'impératif
+ex: "DATA-102 Create ETL pipeline entry point"

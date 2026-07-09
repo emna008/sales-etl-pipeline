@@ -1,0 +1,7 @@
+date,produit_id,produit_nom,quantite,prix_unitaire,magasin_id
+2026-06-01,P001,Café moulu 250g,3,4.50,M01
+2026-06-01,P002,Chocolat noir 70%,2,3.20,M01
+2026-06-01,P003,Bouteille d'eau 1.5L,5,1.10,M02
+2026-06-01,P004,Yaourt nature,6,0.95,M02
+2026-06-01,P005,Pack de mouchoirs,1,2.80,M03
+2026-06-01,P006,Fromage râpé 200g,2,3.75,M03
